@@ -1,0 +1,4 @@
+export enum UserRoleType {
+  CLASSIC_USER = 'CLASSIC_USER',
+  SUPERADMIN = 'SUPERADMIN'
+}
