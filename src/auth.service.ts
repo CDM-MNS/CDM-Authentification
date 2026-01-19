@@ -1,3 +1,4 @@
+import { UserDto } from '@cdm/models';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
@@ -6,7 +7,6 @@ import { UserSignInBody } from './objects/body/user-sign-in.body';
 import { UserSignUpBody } from './objects/body/user-sign-up.body';
 import { JwtTokensDto } from './objects/dto/jwt-tokens.dto';
 import { SetRefreshTokenDto } from './objects/dto/set-refresh-token.dto';
-import { UserDto } from './objects/dto/user.dto';
 
 @Injectable()
 export class AuthService {
