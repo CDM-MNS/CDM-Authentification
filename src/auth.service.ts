@@ -1,5 +1,5 @@
 import { UserDto } from '@cdm/models';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -35,7 +35,7 @@ export class AuthService {
 
     async signIn(body: UserSignInBody) {
         const user: UserDto = await firstValueFrom(
-            this.userClient.send({ cmd: 'user.findOne' }, { email: body.email })
+            this.userClient.send({ cmd: 'user.findOneByEmail' }, { email: body.email })
         );
 
         if (user) {
@@ -46,10 +46,36 @@ export class AuthService {
         }
     }
 
+    async refreshToken(token: string) {
+        try {
+            const decoded = await this.jwtService.verifyAsync(token);
+
+            if (!decoded?.sub) {
+                throw new ForbiddenException("Invalid token");
+            }
+
+            const user = await this.fetchOneUserById(decoded.sub);
+
+            if (!user || user.refreshToken !== token) {
+                throw new ForbiddenException("Access denied");
+            }
+
+            return await this.setTokens(user);
+        } catch (e) {
+            throw new ForbiddenException("Invalid refresh token");
+        }
+    }
+
     // MARK - Utils TCP
+    async fetchOneUserById(id: number): Promise<UserDto> {
+        return await firstValueFrom(
+            this.userClient.send({ cmd: 'user.findOneById' }, { id: id })
+        );
+    }
+
     async fetchOneUserByEmail(email: string): Promise<UserDto> {
         return await firstValueFrom(
-            this.userClient.send({ cmd: 'user.findOne' }, { email: email })
+            this.userClient.send({ cmd: 'user.findOneByEmail' }, { email: email })
         );
     }
 
@@ -66,7 +92,7 @@ export class AuthService {
     }
 
     // MARK - Utils
-     async setTokens(user: UserDto): Promise<UserDto> {
+    async setTokens(user: UserDto): Promise<UserDto> {
         if (user.id) {
             const tokens = await this.generateTokenAndRefreshToken(user)
             const dto = new SetRefreshTokenDto(user.id, tokens.refreshToken)
@@ -79,7 +105,7 @@ export class AuthService {
     }
 
     async generateTokenAndRefreshToken(user: UserDto): Promise<JwtTokensDto> {
-        const payload = { sub: user.id, email: user.email };
+        const payload = { sub: user.id };
 
         const accessToken = await this.jwtService.signAsync(payload, {
             expiresIn: "1h"

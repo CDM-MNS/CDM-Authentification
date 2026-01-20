@@ -29,6 +29,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "amqp-connection-manager": "^5.0.0",
     "amqplib": "^0.10.9",
+    "argon2": "^0.44.0",
     "class-validator": "^0.14.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
