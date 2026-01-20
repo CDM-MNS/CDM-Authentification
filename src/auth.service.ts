@@ -26,24 +26,10 @@ export class AuthService {
                 const userWithTokens = await this.setTokens(createdUser)
                 return userWithTokens
             } else {
-                console.log('Fail to create')
                 throw new BadRequestException('Fail to create')
             }
         } else {
-            console.log('already exist')
             throw new BadRequestException('User already exist')
-        }
-    }
-
-    async setTokens(user: UserDto): Promise<UserDto> {
-        if (user.id) {
-            const tokens = await this.generateTokenAndRefreshToken(user)
-            const dto = new SetRefreshTokenDto(user.id, tokens.refreshToken)
-            const updatedUser: UserDto = await this.setRefreshToken(dto)
-            updatedUser.accessToken = tokens.accessToken
-            return updatedUser
-        } else {
-            throw new BadRequestException('No user id')
         }
     }
 
@@ -52,21 +38,12 @@ export class AuthService {
             this.userClient.send({ cmd: 'user.findOne' }, { email: body.email })
         );
 
-        console.log("User : ", user)
-
-        /*
         if (user) {
-            const tokens = await this.generateTokenAndRefreshToken(user)
-
-            await this.repository.update(userSaved.id, {
-                refreshToken: await argon2.hash(tokens.refreshToken),
-            });
-
-            return this.generateUserWithToken(user, tokens)
+            const userWithTokens = await this.setTokens(user)
+            return userWithTokens
         } else {
             throw new BadRequestException('Issue with sign in');
         }
-            */
     }
 
     // MARK - Utils TCP
@@ -89,6 +66,18 @@ export class AuthService {
     }
 
     // MARK - Utils
+     async setTokens(user: UserDto): Promise<UserDto> {
+        if (user.id) {
+            const tokens = await this.generateTokenAndRefreshToken(user)
+            const dto = new SetRefreshTokenDto(user.id, tokens.refreshToken)
+            const updatedUser: UserDto = await this.setRefreshToken(dto)
+            updatedUser.accessToken = tokens.accessToken
+            return updatedUser
+        } else {
+            throw new BadRequestException('No user id')
+        }
+    }
+
     async generateTokenAndRefreshToken(user: UserDto): Promise<JwtTokensDto> {
         const payload = { sub: user.id, email: user.email };
 
