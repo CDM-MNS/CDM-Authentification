@@ -1,4 +1,4 @@
-import { UserRoleType } from "@cdm/models";
+import { UserRoleType } from "cdm-models";
 import { IsEmail, IsEnum, IsNotEmpty, MinLength } from "class-validator";
 
 export class UserSignUpBody {
