@@ -34,9 +34,7 @@ export class AuthService {
     }
 
     async signIn(body: UserSignInBody) {
-        const user: UserDto = await firstValueFrom(
-            this.userClient.send({ cmd: 'user.findOneByEmail' }, { email: body.email })
-        );
+        const user: UserDto = await this.fetchOneUserByEmail(body.email)
 
         if (user) {
             const userWithTokens = await this.setTokens(user)
@@ -69,25 +67,25 @@ export class AuthService {
     // MARK - Utils TCP
     async fetchOneUserById(id: number): Promise<UserDto> {
         return await firstValueFrom(
-            this.userClient.send({ cmd: 'user.findOneById' }, { id: id })
+            this.userClient.send({ cmd: 'auth.findOneById' }, { id: id })
         );
     }
 
     async fetchOneUserByEmail(email: string): Promise<UserDto> {
         return await firstValueFrom(
-            this.userClient.send({ cmd: 'user.findOneByEmail' }, { email: email })
+            this.userClient.send({ cmd: 'auth.findOneByEmail' }, { email: email })
         );
     }
 
     async createUser(body: UserSignInBody): Promise<UserDto> {
         return await firstValueFrom(
-            this.userClient.send({ cmd: 'user.create' }, body)
+            this.userClient.send({ cmd: 'auth.needUserCreation' }, body)
         );
     }
 
     async setRefreshToken(refreshTokenDto: SetRefreshTokenDto): Promise<UserDto> {
         return await firstValueFrom(
-            this.userClient.send({ cmd: 'user.setRefreshToken' }, refreshTokenDto)
+            this.userClient.send({ cmd: 'auth.setRefreshToken' }, refreshTokenDto)
         );
     }
 
