@@ -1,7 +1,7 @@
-import { UserDto } from '@cdm/models';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
+import { AuthEventType, UserDto } from 'cdm-models';
 import { firstValueFrom } from 'rxjs';
 import { UserSignInBody } from './objects/body/user-sign-in.body';
 import { UserSignUpBody } from './objects/body/user-sign-up.body';
@@ -67,25 +67,25 @@ export class AuthService {
     // MARK - Utils TCP
     async fetchOneUserById(id: number): Promise<UserDto> {
         return await firstValueFrom(
-            this.userClient.send({ cmd: 'auth.findOneById' }, { id: id })
+            this.userClient.send({ cmd: AuthEventType.FIND_ONE_BY_ID }, { id: id })
         );
     }
 
     async fetchOneUserByEmail(email: string): Promise<UserDto> {
         return await firstValueFrom(
-            this.userClient.send({ cmd: 'auth.findOneByEmail' }, { email: email })
+            this.userClient.send({ cmd: AuthEventType.FIND_ONE_BY_EMAIL }, { email: email })
         );
     }
 
     async createUser(body: UserSignInBody): Promise<UserDto> {
         return await firstValueFrom(
-            this.userClient.send({ cmd: 'auth.needUserCreation' }, body)
+            this.userClient.send({ cmd: AuthEventType.NEED_USER_CREATION }, body)
         );
     }
 
     async setRefreshToken(refreshTokenDto: SetRefreshTokenDto): Promise<UserDto> {
         return await firstValueFrom(
-            this.userClient.send({ cmd: 'auth.setRefreshToken' }, refreshTokenDto)
+            this.userClient.send({ cmd: AuthEventType.SET_REFRESH_TOKEN }, refreshTokenDto)
         );
     }
 
